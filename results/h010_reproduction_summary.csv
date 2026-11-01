@@ -1,0 +1,4 @@
+graph,actual_h,best_epoch,val_accuracy,test_accuracy,model_seed,split_protocol
+r1,0.103437,183,79.46,71.60,123,reconstructed-aligned-25-25-50-seed42
+r2,0.100404,810,80.27,72.80,123,reconstructed-aligned-25-25-50-seed42
+r3,0.104447,235,80.27,74.13,123,reconstructed-aligned-25-25-50-seed42

@@ -103,3 +103,30 @@ venv.bak/
 .mypy_cache/
 
 .vscode/
+
+# macOS system files
+.DS_Store
+.AppleDouble
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Local environments and secrets
+.venv/
+.env
+.env.*
+
+# Downloaded datasets and archives
+/existing_data/
+/npz-datasets/
+
+# Generated binary graphs
+/constructed_data/*.npz
+/constructed_data/*/*.npz
+
+# Local training outputs and execution logs
+/h2gcn/results/
+/repro_logs/
