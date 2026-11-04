@@ -1,0 +1,24 @@
+.git
+.gitignore
+.DS_Store
+__pycache__
+*.pyc
+*.pyo
+.ipynb_checkpoints
+
+existing_data/
+constructed_data/
+npz-datasets/
+results/
+repro_logs/
+
+*.npz
+*.zip
+*.tar
+*.tar.gz
+*.ckpt
+*.index
+*.data-*
+
+# Local provenance can include host/container metadata.
+docker/provenance/

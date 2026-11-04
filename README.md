@@ -1,156 +1,142 @@
-# Beyond Homophily in Graph Neural Networks: Current Limitations and Effective Designs
+# Reproducing H2GCN under Homophily and Structural Distribution Shift
 
-Jiong Zhu, Yujun Yan, Lingxiao Zhao, Mark Heimann, Leman Akoglu, and Danai Koutra. 2020. *Beyond Homophily in Graph Neural Networks: Current Limitations and Effective Designs*. Advances in Neural Information Processing Systems 33 (2020).
+**COMP8240 | Applications of Data Science | Replication and extension study**
 
-[[Paper]](https://arxiv.org/abs/2006.11468)
-[[Poster]](https://www.jiongzhu.net/assets/files/F20-Jiong-H2GCN-NeurIPS-Poster.pdf)
-[[Slides]](https://www.jiongzhu.net/assets/files/F20-Jiong-H2GCN-NeurIPS-Talk.pdf)
+This repository studies how the two-hop graph neural network **H2GCN** behaves when a graph changes from heterophilous to homophilous and when its structural distribution changes. It reproduces a selected result from Zhu et al. (2020), evaluates a **30-graph controlled SBM/DC-SBM benchmark**, and tests generalisation on the **LastFM-Asia** social network. The study compares H2GCN with independently adapted GCN and GraphSAGE baselines, and with an MLP on the real-world graph.
 
-## Updates
+This is **not** the official H2GCN project. The model implementation and original experiment framework are credited to [GemsLab/H2GCN](https://github.com/GemsLab/H2GCN), based on [Zhu et al. (2020), *Beyond Homophily in Graph Neural Networks: Current Limitations and Effective Designs*](https://arxiv.org/abs/2006.11468). The original upstream README is retained as [`README_UPSTREAM_H2GCN.md`](README_UPSTREAM_H2GCN.md).
 
-- Oct. 2021: We additionally provide our synthetic datasets `syn-cora` and `syn-products` in a more straight-forward `npz` format; see README in folder `/npz-datasets` for more details.
+**Start here:** [Reproducibility protocol](REPRODUCIBILITY.md) · [Docker and environment setup](DOCKER.md) · [Dataset generation scripts](scripts/) · [Curated results](results/)
 
-- Aug. 2021: In a [blog post](https://www.jiongzhu.net/revisiting-heterophily-GNNs/), we revisit the problem of heterophily for GNNs and discuss the reasons behind seemly different takeaways in light of recent works in this area.
+## Research questions
 
-## Requirements
+1. How closely can the published H2GCN result on released `syn-cora` graphs be reproduced when the original evaluation split is unavailable?
+2. How do H2GCN, GCN and GraphSAGE respond to increasing edge homophily on graphs with different degree and connectivity profiles?
+3. What explains observed differences between SBM and degree-corrected SBM, particularly for isolated and low-degree nodes?
+4. How well do the tested models transfer to a social-network node-classification task, and how sensitive is H2GCN to regularisation?
 
-### Basic Requirements
+## Experiment overview
 
-- **Python** >= 3.7 (tested on 3.8)
-- **signac**: this package utilizes [signac](https://signac.io) to manage experiment data and jobs. signac can be installed with the following command:
+| Part | Data and protocol | Purpose |
+|---|---|---|
+| Original-paper check | Three published `syn-cora` realisations at edge homophily near 0.10, aligned reconstructed class-balanced split | Approximate replication of the paper's H2GCN-2 result |
+| Controlled extension | SBM and degree-corrected SBM, 5 targets × 3 graph realisations × 2 families = **30 graphs** | Compare homophily and structural distribution shifts |
+| Synthetic baselines | H2GCN-2, validation-selected GCN, validation-selected GraphSAGE | Measure architectural differences on matched graph realisations |
+| Degree audit | Node degrees 0, 1–2, 3–5, 6+ | Examine failures related to node connectivity |
+| External dataset | SNAP LastFM-Asia; 18 geographic classes, one fixed stratified split | Test external-domain performance and class imbalance |
 
-  ```bash
-  pip install signac==1.1 signac-flow==0.7.1 signac-dashboard
-  ```
+**Controlled graph data:** Each synthetic graph contains 1,490 nodes, 1,433 features and five classes. Node attributes, labels and split are held fixed across conditions, whereas edges are regenerated. The common split consists of 370 training, 370 validation and 750 test nodes. The five target edge-homophily levels are 0.10, 0.30, 0.50, 0.70 and 0.90. Targets are not assumed to equal the empirically observed homophily; see `results/structural_grid_summary.csv`.
 
-  Note that the latest version of signac may cause incompatibility.
-- **numpy** (tested on 1.18.5)
-- **scipy** (tested on 1.5.0)
-- **networkx** >= 2.4 (tested on 2.4)
-- **scikit-learn** (tested on 0.23.2)
+### Approximate original-paper reproduction
 
-### For `H2GCN`
+| Measurement | H2GCN-2 test accuracy |
+|---|---:|
+| Zhu et al. (2020), reported `syn-cora` at h ≈ 0.10 | **76.87 ± 0.43%** |
+| This study, released graphs and reconstructed 25/25/50 split | **72.84 ± 1.27%** |
 
-- **TensorFlow** >= 2.0 (tested on 2.2)
+Values are mean ± sample standard deviation over three graphs. The original paper's split assignments were not available; the replacement split was mapped across graph realisations using feature/label signatures. Therefore, the roughly 4.03-point gap **is not evidence of a model defect or an exact failure to reproduce the paper's evaluation protocol**.
 
-Note that it is possible to use `H2GCN` without `signac` and `scikit-learn` on your own data and experimental framework.
+### Controlled homophily and structure experiments
 
-### For baselines
+Mean test accuracy across three graph realisations per condition (%):
 
-We also include the code for the baseline methods in the repository. These code are mostly the same as the reference implementations provided by the authors, *with our modifications* to add JK-connections, interoperability with our experimental pipeline, etc. For the requirements to run these baselines, please refer to the instructions provided by the original authors of the corresponding code, which could be found in each folder under `/baselines`.
+| Target h | Family | H2GCN-2 | GCN | GraphSAGE |
+|---:|---|---:|---:|---:|
+| 0.10 | SBM | 71.60 | 33.60 | 69.47 |
+| 0.10 | DC-SBM | 71.42 | 39.24 | 66.71 |
+| 0.30 | SBM | 71.69 | 49.38 | 69.11 |
+| 0.30 | DC-SBM | 70.40 | 50.89 | 67.51 |
+| 0.50 | SBM | 77.69 | 70.53 | 75.69 |
+| 0.50 | DC-SBM | 77.78 | 69.96 | 74.98 |
+| 0.70 | SBM | 90.13 | 88.18 | 86.18 |
+| 0.70 | DC-SBM | 87.87 | 86.53 | 82.93 |
+| 0.90 | SBM | 97.16 | 96.93 | 95.78 |
+| 0.90 | DC-SBM | 93.96 | 94.84 | 94.09 |
 
-As a general note, TensorFlow 1.15 can be used for all code requiring TensorFlow 1.x; for PyTorch, it is usually fine to use PyTorch 1.6; all code should be able to run under Python >= 3.7. In addition, the [basic requirements](#basic-requirements) must also be met.
+The H2GCN configuration was held fixed on the synthetic grid. GCN and GraphSAGE were selected per graph using their validation sets, so hyperparameter-search budgets are **not identical**. Reported graph realisations, rather than individual nodes, are the relevant replicate units. Detailed runs and validation-selection candidates are in `results/`.
 
-## Usage
+**Structural interpretation:** DC-SBM graphs also contain more isolated nodes and smaller largest connected components than SBM graphs. Results therefore represent a **combined structural shift**, not a controlled causal test of degree variance alone. Degree-bin standardisation in `results/degree_robustness_three_model_composition.csv` is descriptive rather than causal.
 
-### Download Datasets
+### LastFM-Asia external-domain evaluation
 
-The datasets can be downloaded using the bash scripts provided in `/experiments/h2gcn/scripts` (requires the latest version of [`gdown`](https://github.com/wkentaro/gdown) to be installed), which also prepare the datasets for use in our experimental framework based on `signac`.
+The [SNAP LastFM-Asia dataset](https://snap.stanford.edu/data/feather-lastfm-social.html) contains 7,624 users, 27,806 undirected edges, 7,842 binary artist features and 18 imbalanced geographic classes. The fixed stratified split (seed 42) contains 1,898 training, 1,898 validation and 3,828 test nodes. The results below vary **training seeds 123, 124 and 125**, not independent train/test splits.
 
-We make use of `signac` to index and manage the datasets: the datasets and experiments are stored in hierarchically organized signac jobs, with the **1st level** storing different graphs, **2nd level** storing different sets of features, and **3rd level** storing different training-validation-test splits. Each level contains its own state points and job documents to differentiate with other jobs.
+| Evaluated configuration | Test accuracy | Test macro-F1 |
+|---|---:|---:|
+| **H2GCN-2, validation-selected L2 = 0.00005** | **85.17 ± 0.03%** | **62.34 ± 0.33%** |
+| GCN, evaluated configuration | 82.95 ± 0.47% | 53.82 ± 2.54% |
+| MLP, evaluated configuration | 68.59 ± 0.34% | 36.04 ± 0.58% |
+| H2GCN-2, original L2 = 0.0005 | 55.71 ± 0.11% | 16.14 ± 0.11% |
 
-Use `signac schema` to list all available properties in graph state points; use `signac find` to filter graphs using properties in the state points:
+The six-candidate H2GCN sensitivity analysis selected its regularisation setting **using validation accuracy only**, with validation loss as a tie-breaker. The 85.17% result is a three-seed mean for that previously selected setting. Its advantage over the evaluated GCN is **configuration-specific**, not a claim that H2GCN always outperforms GCN: tuning budgets were different and all runs used one graph/split. Two minority classes had zero recall in the selected seed-123 test evaluation, despite high overall accuracy.
+
+## Repository map
+
+```text
+h2gcn/                        Original H2GCN implementation
+baselines/                    Original baseline source trees
+scripts/generate_*grid.py     SBM and DC-SBM generation
+scripts/calibrate_dcsbm.py    Degree-corrected graph calibration
+scripts/audit_structural_grid.py
+scripts/gcn_npz_tf2.py        GCN adapter, TensorFlow 2.2
+scripts/graphsage_npz_reference.py
+scripts/train_lastfm_h2gcn_*.py
+scripts/lastfm_gcn_mlp_validated.py
+scripts/summarize_*.py        Aggregation and validation selections
+results/                      Curated CSV and JSON evidence
+REPRODUCIBILITY.md            Protocols, caveats and output provenance
+DOCKER.md                     Environment setup and verification
+Dockerfile.h2gcn              Clean-build-tested H2GCN environment recipe
+Dockerfile.graphsage          GraphSAGE PyTorch build recipe
+.dockerignore                 Excludes data/logs/checkpoints from Docker builds
+```
+
+The complete list of results and the differences among training, validation and test scripts are in [REPRODUCIBILITY.md](REPRODUCIBILITY.md). The repository deliberately excludes most raw archives, constructed `.npz` graphs, TensorFlow checkpoints, per-node prediction matrices and experiment logs.
+
+## Getting started
+
+The H2GCN TensorFlow image was rebuilt from the published Dockerfile on 4 November 2026 using `linux/amd64` emulation on Apple Silicon. The build passed package and data-loader verification, and the **saved LastFM checkpoint reproduced its recorded validation metrics** in the new image. This is a checkpoint-level validation, **not a full rerun of all experiments**. The LastFM checkpoint and NPZ datasets are not distributed in the public Git repository.
 
 ```bash
-cd experiments/h2gcn/
+git clone https://github.com/navraaf/h2gcn-replication-structural-shift.git
+cd h2gcn-replication-structural-shift
 
-# List available properties in graph state points
-signac schema
+docker build --no-cache --platform linux/amd64 \
+  -f Dockerfile.h2gcn -t h2gcn-repro:clean-test .
 
-# Find graphs in syn-products with homophily level h=0.1
-signac find numNode 10000 h 0.1
-
-# Find real benchmark "Cora"
-signac find benchmark true datasetName\.\$regex "cora"
+docker run --rm --platform linux/amd64 \
+  -v "$PWD":/workspace -w /workspace h2gcn-repro:clean-test \
+  python scripts/verify_h2gcn_environment.py
 ```
 
-`/experiments/h2gcn/utils/signac_tools.py` provides helpful functions to iterate through the data space in Python; more usages of signac can be found in these [documents](https://docs.signac.io/en/latest/).
+The verified clean environment uses Python 3.8.20, TensorFlow 2.2.0, NumPy 1.18.5, SciPy 1.4.1, NetworkX 2.4 and scikit-learn 0.23.2. The earlier working research image (`h2gcn-repro:v1`) had a different package history and is preserved separately. **Do not overwrite it** when testing a clean build.
 
-#### Alternative: Download `syn-cora` and `syn-products` in `npz` Format
+If the fixed validation data and selected model checkpoint are locally available, the stronger verification is:
 
-If you are interested in using the two synthetic datasets `syn-cora` and `syn-products` in your own research, we additionally provide them in a more straight-forward `npz` format; See README in folder `/npz-datasets` for more details. Note that the new `npz` format does NOT keep the same training, validation and test splits **and ratios** used in our experiments; for [replicating our experiments](#replicate-experiments-with-signac), please follow the above approach to download the datasets in the old format.
-
-### Replicate Experiments with `signac`
-
-- To replicate our experiments of each model on specific datasets, use Python scripts in `/experiments/h2gcn`, and the corresponding JSON config files in `/experiments/h2gcn/configs`. For example, to run `H2GCN` on our synthetic benchmarks `syn-cora`:
-
-  ```bash
-  cd experiments/h2gcn/
-  python run_hgcn_experiments.py -c configs/syn-cora/h2gcn.json [-i] run [-p PARALLEL_NUM]
-  ```
-
-  - Files and results generated in experiments are also stored with signac on top of the hierarchical order introduced above: the **4th level** separates different models, and the **5th level** stores files and results generated in different runs with different parameters of the same model.
-  - By default, `stdout` and `stderr` of each model are stored in `terminal_output.log` in the 4th level; use `-i` if you want to see them through your terminal.
-  - Use `-p` if you want to run experiments in parallel on multiple graphs (1st level).
-  - Baseline models can be run through the following scripts:
-
-    - **GCN, GCN-Cheby, GCN+JK and GCN-Cheby+JK**: `run_gcn_experiments.py`
-    - **GraphSAGE, GraphSAGE+JK**: `run_graphsage_experiments.py`
-    - **MixHop**: `run_mixhop_experiments.py`
-    - **GAT**: `run_gat_experiments.py`
-    - **MLP**: `run_hgcn_experiments.py`
-  
-- To summarize experiment results of each model on specific datasets to a CSV file, use Python script `/experiments/h2gcn/run_experiments_summarization.py` with the corresponding model name and config file. For example, to summarize `H2GCN` results on our synthetic benchmark `syn-cora`:
-
-  ```bash
-  cd experiments/h2gcn/
-  python run_experiments_summarization.py h2gcn -f configs/syn-cora/h2gcn.json
-  ```
-
-- To list all paths of the 3rd level datasets splits used in a experiment (in planetoid format) without running experiments, use the following command:
-
-  ```bash
-  cd experiments/h2gcn/
-  python run_hgcn_experiments.py -c configs/syn-cora/h2gcn.json --check_paths run
-  ```
-
-### Standalone H2GCN Package
-
-Our implementation of H2GCN is stored in the `h2gcn` folder, which can be used as a standalone package on your own data and experimental framework.
-
-Example usages:
-
-- H2GCN-2
-
-  ```bash
-  cd h2gcn
-  python run_experiments.py H2GCN planetoid \
-    --dataset ind.citeseer \
-    --dataset_path ../baselines/gcn/gcn/data/
-  ```
-
-- H2GCN-1
-
-  ```bash
-  cd h2gcn
-  python run_experiments.py H2GCN planetoid \
-    --network_setup M64-R-T1-G-V-C1-D0.5-MO \
-    --dataset ind.citeseer \
-    --dataset_path ../baselines/gcn/gcn/data/
-  ```
-
-- Use `--help` for more advanced usages:
-
-  ```bash
-  python run_experiments.py H2GCN planetoid --help
-  ```
-
-We only support datasets stored in [`planetoid` format](https://github.com/kimiyoung/planetoid). You could also add support to different data formats and models beyond H2GCN by adding your own modules to `/h2gcn/datasets` and `/h2gcn/models`, respectively; check out ou code for more details.
-
-## Contact
-
-Please contact Jiong Zhu (jiongzhu@umich.edu) in case you have any questions.
-
-## Citation
-
-Please cite our paper if you make use of this code in your own work:
-
-```bibtex
-@article{zhu2020beyond,
-  title={Beyond Homophily in Graph Neural Networks: Current Limitations and Effective Designs},
-  author={Zhu, Jiong and Yan, Yujun and Zhao, Lingxiao and Heimann, Mark and Akoglu, Leman and Koutra, Danai},
-  journal={Advances in Neural Information Processing Systems},
-  volume={33},
-  year={2020}
-}
+```bash
+docker run --rm --platform linux/amd64 \
+  -v "$PWD":/workspace -w /workspace h2gcn-repro:clean-test \
+  python scripts/verify_lastfm_checkpoint_validation_only.py
 ```
+
+This command reproduces the frozen LastFM validation accuracy (85.4057%), macro-F1 (63.6393%) and validation loss (1.08940) from the existing checkpoint without test-set scoring or retraining. It cannot run on an empty checkout because the relevant local graph, split and checkpoint are excluded from Git.
+
+GraphSAGE uses a separate PyTorch image (see [`Dockerfile.graphsage`](Dockerfile.graphsage) and [`DOCKER.md`](DOCKER.md)). For full experiment protocols, additional package constraints and dataset construction steps, consult [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md).
+
+To regenerate experiments, first obtain the released source datasets, then consult the exact argument syntax in the tracked generation and runner scripts and the corresponding README files. In particular, `constructed_data/`, `existing_data/` and some split/checkpoint paths are local artifacts not included in the public commit. **This is not a one-command rerun from an empty checkout.** Readers can independently inspect the committed aggregate CSV/JSON evidence without training models.
+
+## Reproducibility, limitations and ethics
+
+- **Split fidelity:** The paper's original synthetic split IDs are unavailable; only approximate paper replication is claimed.
+- **Structural confounding:** DC-SBM changes degree dispersion, isolation and connectivity together. No causal effect of degree heterogeneity alone is identified.
+- **Unequal tuning:** The evaluated GCN, GraphSAGE and H2GCN configurations have different validation-search protocols.
+- **Repeat-unit distinction:** Synthetic summaries aggregate three graphs; LastFM summaries aggregate three initialisation seeds on one split.
+- **Class imbalance and privacy:** LastFM labels describe users' locations and artist interests. Results are aggregate research analyses, not individual location-inference recommendations. Minority-class recall is reported and should not be hidden by overall accuracy.
+- **Software age:** TensorFlow 2.2 and Python 3.8 are legacy dependencies. Isolate the environment in Docker; do not use it as a production service.
+
+## Attribution
+
+- Zhu, J., Yan, Y., Zhao, L., Heimann, M., Akoglu, L., & Koutra, D. (2020). *Beyond Homophily in Graph Neural Networks: Current Limitations and Effective Designs*. NeurIPS. [Paper](https://arxiv.org/abs/2006.11468) · [Official source](https://github.com/GemsLab/H2GCN).
+- Rozemberczki, B., & Sarkar, R. (2020). *Characteristic Functions on Graphs: Birds of a Feather, from Statistical Descriptors to Parametric Models*. CIKM. [SNAP dataset and citation](https://snap.stanford.edu/data/feather-lastfm-social.html).
+
+This is an academic replication and extension. The original authors retain credit for their code and scientific contributions; all modifications, new datasets and evaluation protocols should be identified separately. Refer to the original repository for upstream licensing terms.

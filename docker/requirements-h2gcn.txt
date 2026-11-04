@@ -1,0 +1,10 @@
+# Clean-build-verified H2GCN package pins, 4 November 2026.
+# Different from the original working image for SciPy only at direct-pin level.
+# For exact provenance, compare against docker/provenance/working_pip_freeze.txt.
+tensorflow==2.2.0
+numpy==1.18.5
+scipy==1.4.1
+networkx==2.4
+scikit-learn==0.23.2
+protobuf==3.20.3
+h5py==2.10.0
