@@ -1,0 +1,19 @@
+{
+  "selection_metric": "maximum validation accuracy, minimum validation loss tie-break",
+  "seed": 123,
+  "split": "existing_data/lastfm_asia/processed/lastfm_asia_split_seed42.npz",
+  "candidate_count": 6,
+  "selected": {
+    "config": "l2small",
+    "hidden": 64,
+    "learning_rate": 0.01,
+    "dropout": 0.5,
+    "weight_decay": 5e-05,
+    "val_accuracy": 0.8540569020021075,
+    "val_macro_f1": 0.6363929564511865,
+    "best_val_loss": 1.0894032716751099,
+    "best_epoch": 404,
+    "checkpoint": "/workspace/results/lastfm_h2gcn_sensitivity/l2small/best_checkpoint/ckpt"
+  },
+  "test_metrics_examined_for_selection": false
+}

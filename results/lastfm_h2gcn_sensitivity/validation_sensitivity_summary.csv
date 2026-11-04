@@ -1,0 +1,7 @@
+config,hidden,learning_rate,dropout,weight_decay,val_accuracy,val_macro_f1,best_val_loss,best_epoch,checkpoint
+l2small,64,0.01,0.5,5e-05,0.8540569020021075,0.6363929564511865,1.0894032716751099,404,/workspace/results/lastfm_h2gcn_sensitivity/l2small/best_checkpoint/ckpt
+drop02,64,0.01,0.2,0.0005,0.565331928345627,0.17074128640903113,2.1371073722839355,966,/workspace/results/lastfm_h2gcn_sensitivity/drop02/best_checkpoint/ckpt-1
+h128,128,0.01,0.5,0.0005,0.5621707060063225,0.16388238722792547,2.1468048095703125,178,/workspace/results/lastfm_h2gcn_sensitivity/h128/best_checkpoint/ckpt-1
+reference,64,0.01,0.5,0.0005,0.5616438356164384,0.1630956213654126,2.1434481143951416,421,results/lastfm_h2gcn/full_seed123/best_checkpoint
+h32,32,0.01,0.5,0.0005,0.5611169652265543,0.16207200003403013,2.1423938274383545,687,/workspace/results/lastfm_h2gcn_sensitivity/h32/best_checkpoint/ckpt-1
+lr003,64,0.003,0.5,0.0005,0.5611169652265543,0.16307095527954252,2.1499929428100586,397,/workspace/results/lastfm_h2gcn_sensitivity/lr003/best_checkpoint/ckpt-1

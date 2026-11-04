@@ -1,0 +1,2 @@
+model,selected_config,n_training_seeds,seeds,test_accuracy_mean,test_accuracy_sample_sd,test_macro_f1_mean,test_macro_f1_sample_sd,test_weighted_f1_mean,test_weighted_f1_sample_sd,test_balanced_accuracy_mean,test_balanced_accuracy_sample_sd
+h2gcn,l2small,3,123;124;125,0.8517067223963776,0.000301645908667507,0.6234095261901828,0.003270374929620608,0.8354806309389572,0.00044847830265875937,0.5993160529536207,0.0028485033738466447

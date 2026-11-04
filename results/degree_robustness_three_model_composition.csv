@@ -1,0 +1,16 @@
+model,target_homophily,sbm_observed_accuracy_pct,dcsbm_observed_accuracy_pct,dcsbm_standardized_to_sbm_degree_mix_pct,observed_dcsbm_minus_sbm_pp,within_bin_standardized_difference_pp,degree_bin_composition_component_pp,interpretation
+h2gcn,0.10,71.6,71.422222,71.114408,-0.177777,-0.485592,0.307814,descriptive; graph realizations are the independent units
+h2gcn,0.30,71.688889,70.4,71.390884,-1.288889,-0.298005,-0.990884,descriptive; graph realizations are the independent units
+h2gcn,0.50,77.688889,77.777778,78.559312,0.088889,0.870424,-0.781535,descriptive; graph realizations are the independent units
+h2gcn,0.70,90.133333,87.866667,89.964086,-2.266667,-0.169248,-2.097419,descriptive; graph realizations are the independent units
+h2gcn,0.90,97.155555,93.955555,96.323978,-3.2,-0.831577,-2.368423,descriptive; graph realizations are the independent units
+gcn,0.10,33.6,39.244444,35.801973,5.644444,2.201973,3.442472,descriptive; graph realizations are the independent units
+gcn,0.30,49.377778,50.888889,49.717804,1.511111,0.340026,1.171085,descriptive; graph realizations are the independent units
+gcn,0.50,70.533333,69.955556,70.570788,-0.577778,0.037454,-0.615232,descriptive; graph realizations are the independent units
+gcn,0.70,88.177778,86.533333,88.757492,-1.644444,0.579714,-2.224158,descriptive; graph realizations are the independent units
+gcn,0.90,96.933334,94.844445,97.053526,-2.088889,0.120192,-2.209081,descriptive; graph realizations are the independent units
+graphsage,0.10,69.466667,66.711111,66.678801,-2.755555,-2.787866,0.032311,descriptive; graph realizations are the independent units
+graphsage,0.30,69.111111,67.511111,68.763503,-1.6,-0.347608,-1.252392,descriptive; graph realizations are the independent units
+graphsage,0.50,75.688889,74.977778,76.681876,-0.71111,0.992987,-1.704098,descriptive; graph realizations are the independent units
+graphsage,0.70,86.177778,82.933333,84.941985,-3.244444,-1.235792,-2.008652,descriptive; graph realizations are the independent units
+graphsage,0.90,95.777778,94.088889,96.515569,-1.688889,0.737791,-2.42668,descriptive; graph realizations are the independent units

@@ -1,0 +1,12 @@
+# Native ARM64 Python/PyTorch container for Apple Silicon.
+# Does not modify the H2GCN TensorFlow 2.2 image.
+FROM --platform=linux/arm64 python:3.10-slim-bookworm
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+RUN python -m pip install --no-cache-dir \
+    torch==2.5.1 \
+    numpy==1.26.4 \
+    scipy==1.13.1 \
+    scikit-learn==1.5.2 \
+    ipython==8.30.0
+WORKDIR /workspace
+CMD ["python", "--version"]
